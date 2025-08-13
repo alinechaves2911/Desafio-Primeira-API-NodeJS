@@ -1,0 +1,12 @@
+POST http://localhost:3333/courses
+Content-Type: application/json
+
+{
+  "title": "Curso de Phyton"
+}
+
+###
+GET http://localhost:3333/courses
+
+###
+GET http://localhost:3333/courses/5df9b60b-c512-4918-ae6b-e30d8536e7e6

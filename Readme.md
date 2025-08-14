@@ -93,11 +93,14 @@ Tabelas principais definidas em [`src/database/schema.ts`](backend/src/database/
   - `id` (uuid, pk, default random)
   - `title` (text, único, obrigatório)
   - `description` (text, opcional)
-- `users` (exemplo para estudos)
+- `users` 
   - `id` (uuid, pk, default random)
   - `name` (text, obrigatório)
   - `email` (text, único, obrigatório)
-
+- `enrollments`
+  - `id` (uuid, pk, default random)
+  - `user_id` (uuid, fk, obrigatório)
+  - `course_id` (uuid, fk, obrigatório)
 ---
 
 ## Fluxo principal
@@ -145,6 +148,7 @@ sequenceDiagram
 - `npm run db:generate`: gera artefatos do Drizzle a partir do schema
 - `npm run db:migrate`: aplica migrações no banco
 - `npm run db:studio`: abre o Drizzle Studio
+- `npm run test`: executa os testes
 
 ---
 
@@ -158,13 +162,15 @@ sequenceDiagram
 
 ## Atualizações de hoje
 
-- [ ] **Descreva aqui as alterações realizadas hoje.**  
-  Exemplos:
-  - Implementado endpoint de deleção de cursos (`DELETE /courses/:id`)
-  - Ajustada validação de UUID no endpoint de busca por ID
-  - Melhorias na documentação Swagger
-  - Corrigido bug na criação de cursos com títulos duplicados
+- **Testes automatizados.**  
+  
+  - Implementado Testes automatizados E2E.
+  - Separando o server  da aplicação.
+  - Criado banco de dados para testes.
+  - criado o factories para testes.
+  - Configurado o coverage para ver a cobertura dos testes.
 
+  
 ---
 
 ## Licença

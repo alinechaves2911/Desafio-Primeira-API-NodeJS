@@ -1,6 +1,6 @@
-# Desafio Node.js – Primeira API (aulas)
+# API de Cursos – Node.js, Fastify, Drizzle ORM
 
-API simples em Node.js + TypeScript utilizando Fastify, Drizzle ORM (PostgreSQL) e Zod para validação. Inclui documentação Swagger/Scalar disponível em ambiente de desenvolvimento.
+API RESTful para gerenciamento de cursos, construída com Node.js, Fastify, TypeScript, Drizzle ORM (PostgreSQL) e validação com Zod. Inclui autenticação JWT, testes automatizados E2E, factories para testes e cobertura de código.
 
 ---
 
@@ -8,7 +8,9 @@ API simples em Node.js + TypeScript utilizando Fastify, Drizzle ORM (PostgreSQL)
 
 - Node.js 22+
 - Docker e Docker Compose
-- npm (ou outro gerenciador, mas o projeto utiliza `package-lock.json`)
+- npm
+
+---
 
 ## Tecnologias
 
@@ -16,7 +18,10 @@ API simples em Node.js + TypeScript utilizando Fastify, Drizzle ORM (PostgreSQL)
 - TypeScript
 - Drizzle ORM + PostgreSQL
 - Zod (validação)
-- Swagger/OpenAPI + Scalar API Reference (`/docs` quando `NODE_ENV=development`)
+- JWT (autenticação)
+- Swagger/OpenAPI + Scalar (`/docs` em desenvolvimento)
+- Vitest (testes e2e)
+- Coverage integrado
 
 ---
 
@@ -27,20 +32,21 @@ API simples em Node.js + TypeScript utilizando Fastify, Drizzle ORM (PostgreSQL)
    ```bash
    npm install
    ```
-3. Suba o banco Postgres com Docker:
+3. Suba o banco de dados:
    ```bash
    docker compose up -d
    ```
-4. Crie um arquivo `.env` na raiz com:
+4. Crie o arquivo `.env` na raiz de `backend/`:
    ```
    DATABASE_URL=postgresql://postgres:postgres@localhost:5432/desafio
    NODE_ENV=development
+   JWT_SECRET=sua_chave_secreta
    ```
-5. Rode as migrações (Drizzle):
+5. Rode as migrações:
    ```bash
    npm run db:migrate
    ```
-   (Opcional) Para inspecionar o schema/estado com o Drizzle Studio:
+6. (Opcional) Inspecione o banco com Drizzle Studio:
    ```bash
    npm run db:studio
    ```
@@ -53,7 +59,7 @@ API simples em Node.js + TypeScript utilizando Fastify, Drizzle ORM (PostgreSQL)
 npm run dev
 ```
 - Porta padrão: [http://localhost:3333](http://localhost:3333)
-- Documentação da API: [http://localhost:3333/docs](http://localhost:3333/docs) (em desenvolvimento)
+- Documentação: [http://localhost:3333/docs](http://localhost:3333/docs)
 
 ---
 
@@ -61,118 +67,78 @@ npm run dev
 
 Base URL: `http://localhost:3333`
 
-- **POST `/courses`**
-  - Cria um curso
-  - Body (JSON):
+- **POST `/sessions`**  
+  - Login de usuário  
+  - Body:
     ```json
-    { "title": "Curso de Docker" }
+    { "email": "usuario@dominio.com", "password": "123456" }
     ```
-  - Respostas:
-    - 201: `{ "courseId": "<uuid>" }`
+  - Retorna: `{ "token": "<jwt>" }`
 
-- **GET `/courses`**
-  - Lista todos os cursos
-  - 200: `{ "courses": [{ "id": "<uuid>", "title": "..." }] }`
+- **POST `/courses`**  
+  - Cria um curso (requer JWT de manager)
+  - Body:
+    ```json
+    { "title": "Curso de Laravel" }
+    ```
+  - Retorna: `{ "courseId": "<uuid>" }`
 
-- **GET `/courses/:id`**
-  - Busca um curso pelo ID
-  - Parâmetros: `id` (UUID)
-  - Respostas:
-    - 200: `{ "course": { "id": "<uuid>", "title": "...", "description": "... | null" } }`
-    - 404: vazio
+- **GET `/courses`**  
+  - Lista todos os cursos (pode ordenar por título)
 
-> Exemplos prontos no arquivo [`requisicoes.http`](backend/requisicoes.http) (compatível com extensões REST Client).
+- **GET `/courses/:id`**  
+  - Detalhes de um curso (requer JWT)
+
+> Exemplos práticos em [`backend/requisicoes.http`](backend/requisicoes.http).
 
 ---
 
-## Modelos (schema)
+## Modelos principais
 
-Tabelas principais definidas em [`src/database/schema.ts`](backend/src/database/schema.ts):
+- **courses**: id (uuid), title (string, único), description (opcional)
+- **users**: id (uuid), name, email (único), password (hash), role
+- **enrollments**: id, user_id, course_id
 
-- `courses`
-  - `id` (uuid, pk, default random)
-  - `title` (text, único, obrigatório)
-  - `description` (text, opcional)
-- `users` 
-  - `id` (uuid, pk, default random)
-  - `name` (text, obrigatório)
-  - `email` (text, único, obrigatório)
-- `enrollments`
-  - `id` (uuid, pk, default random)
-  - `user_id` (uuid, fk, obrigatório)
-  - `course_id` (uuid, fk, obrigatório)
 ---
 
-## Fluxo principal
+## Testes e Cobertura
 
-```mermaid
-sequenceDiagram
-  participant C as Client
-  participant S as Fastify Server
-  participant V as Zod Validator
-  participant DB as Drizzle + PostgreSQL
-
-  C->>S: POST /courses {title}
-  S->>V: Validar body
-  V-->>S: OK ou Erro 400
-  alt válido
-    S->>DB: INSERT INTO courses (title)
-    DB-->>S: {id}
-    S-->>C: 201 {courseId}
-  else inválido
-    S-->>C: 400
-  end
-
-  C->>S: GET /courses
-  S->>DB: SELECT id,title FROM courses
-  DB-->>S: lista
-  S-->>C: 200 {courses: [...]}
-
-  C->>S: GET /courses/:id
-  S->>V: Validar param id (uuid)
-  V-->>S: OK ou Erro 400
-  alt encontrado
-    S->>DB: SELECT * FROM courses WHERE id=...
-    DB-->>S: course
-    S-->>C: 200 {course}
-  else não encontrado
-    S-->>C: 404
-  end
-```
+- Testes E2E com Vitest (`npm run test`)
+- Factories para geração de dados de teste
+- Banco de dados isolado para testes (`.env.test`)
+- Relatório de cobertura em [`backend/coverage/index.html`](backend/coverage/index.html)
 
 ---
 
 ## Scripts
 
-- `npm run dev`: inicia o servidor com reload e carrega variáveis de `.env`
-- `npm run db:generate`: gera artefatos do Drizzle a partir do schema
-- `npm run db:migrate`: aplica migrações no banco
-- `npm run db:studio`: abre o Drizzle Studio
-- `npm run test`: executa os testes
+- `npm run dev` – inicia o servidor em modo desenvolvimento
+- `npm run db:migrate` – aplica migrações
+- `npm run db:studio` – abre Drizzle Studio
+- `npm run test` – executa testes e2e
+- `npm run coverage` – gera relatório de cobertura
 
 ---
 
-## Dicas e solução de problemas
+## Dicas
 
-- **Conexão recusada ao Postgres:** confirme `docker compose up -d` e que a porta `5432` não está em uso.
-- **Variável `DATABASE_URL` ausente:** verifique seu `.env`. O Drizzle exige essa variável para `db:generate`, `db:migrate` e `db:studio`.
-- **Docs não aparecem em `/docs`:** garanta `NODE_ENV=development` no `.env` e reinicie o servidor.
+- Se o banco não conectar, confira se o Docker está rodando e a porta 5432 está livre.
+- Para autenticação, use o token JWT retornado no login no header `Authorization`.
+- Para ver a cobertura, abra o arquivo [`backend/coverage/index.html`](backend/coverage/index.html) no navegador.
 
 ---
 
-## Atualizações de hoje
+## Atualizações recentes
 
-- **Testes automatizados.**  
-  
-  - Implementado Testes automatizados E2E.
-  - Separando o server  da aplicação.
-  - Criado banco de dados para testes.
-  - criado o factories para testes.
-  - Configurado o coverage para ver a cobertura dos testes.
+- Implementados testes E2E e factories.
+- Separação do server da aplicação para facilitar testes.
+- Banco de dados de testes isolado.
+- Cobertura de código integrada.
+- Validação de payloads com Zod.
+- Autenticação JWT para rotas protegidas.
 
-  
 ---
 
 ## Licença
 
-ISC (ver [`package.json`](backend/package.json)).
+ISC (veja [`backend/package.json`](backend/package.json))

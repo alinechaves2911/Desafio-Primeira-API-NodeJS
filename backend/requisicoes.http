@@ -1,13 +1,25 @@
 POST http://localhost:3333/courses
 Content-Type: application/json
+Authorization: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI5ZDcyMzBlNC03MDNhLTRkZTAtYTY0Yi1lYTAxYmI0OGM5ZGMiLCJyb2xlIjoibWFuYWdlciIsImlhdCI6MTc1NTI3MDc3OX0.x0HJUSX1RZ3mCzgX47GAV340cA8JWGAtmsDwOM-9NAA
 
 {
-  "title": "Curso de ReactNative"
+  "title": "Curso de Laravel"
 }
-
 ###
+
 GET http://localhost:3333/courses?orderBy=title
-# GET http://localhost:3333/courses?orderBy=title&page=3
 
 ###
-GET http://localhost:3333/courses/5df9b60b-c512-4918-ae6b-e30d8536e7e6
+
+GET http://localhost:3333/courses/116bab98-7fd1-499c-9624-0e9980ef9dad
+Authorization: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI4MDY5MWFhNS0wNGVmLTQ5NGUtYjkwMi00OGNkMjQ1MWE0MDIiLCJyb2xlIjoic3R1ZGVudCIsImlhdCI6MTc1NTI3MDM3OH0.-AlsDsZRRl2HajDYmFBRrGLyqYk47aXf6iAye0-6Pes
+
+###
+
+POST http://localhost:3333/sessions
+Content-Type: application/json
+
+{
+  "email": "Raul.Xavier80@live.com",
+  "password": "123456"
+}

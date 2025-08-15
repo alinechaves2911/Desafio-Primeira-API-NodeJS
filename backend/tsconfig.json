@@ -4,6 +4,8 @@
   "_version": "22.0.0",
 
   "compilerOptions": {
+    "outDir": "dist",
+    "rootDir": "src",
     "lib": ["es2024", "ESNext.Array", "ESNext.Collection", "ESNext.Iterator"],
     "module": "nodenext",
     "target": "es2022",
@@ -14,5 +16,6 @@
     "esModuleInterop": true,
     "skipLibCheck": true,
     "moduleResolution": "node16"
-  }
+  },
+  "include": ["src"]
 }

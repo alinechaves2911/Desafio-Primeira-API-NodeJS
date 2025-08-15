@@ -9,8 +9,8 @@
     "lib": ["es2024", "ESNext.Array", "ESNext.Collection", "ESNext.Iterator"],
     "module": "nodenext",
     "target": "es2022",
-    // "allowImportingTsExtensions": true,
-    // "noEmit": true, // Remova ou comente esta linha
+    "allowImportingTsExtensions": true,
+    "noEmit": true, // Remova ou comente esta linha
 
     "strict": true,
     "esModuleInterop": true,
